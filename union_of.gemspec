@@ -7,8 +7,8 @@ Gem::Specification.new do |spec|
   spec.version     = UnionOf::VERSION
   spec.authors     = ['Zeke Gabrielse']
   spec.email       = ['oss@keygen.sh']
-  spec.summary     = 'Define UNION associations for Active Record models.'
-  spec.description = 'Define associations that are a union of other associations on an Active Record model, using a SQL UNION, with full support for joins on the union association.'
+  spec.summary     = 'Define associations that are a union of other associations on an Active Record model, using a SQL UNION.'
+  spec.description = 'Define associations that are a union of other associations on an Active Record model, using a SQL UNION, with full support for joins, preloading and eager loading on the union association. '
   spec.homepage    = 'https://github.com/keygen-sh/union_of'
   spec.license     = 'MIT'
 
