@@ -25,7 +25,7 @@ jobs:
           --health-cmd "mysqladmin ping --silent"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 3
+          --health-retries 10
       postgres:
         image: postgres:14
         ports:
@@ -38,7 +38,7 @@ jobs:
           --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 3
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,16 +60,20 @@ jobs:
               echo "DATABASE_URL=postgres://postgres:postgres@localhost/test" >> $GITHUB_ENV
               ;;
           esac
-      - name: Wait for database
+      - name: Wait for MySQL
+        if: matrix.database == 'mysql'
         run: |
-          case ${{matrix.database}} in
-            mysql)
-              while ! mysqladmin ping -h"localhost" --silent; do sleep 1; done
-              ;;
-            postgres)
-              while ! pg_isready -h "localhost" -U "postgres"; do sleep 1; done
-              ;;
-          esac
+          until mysqladmin ping -h"localhost" --silent; do
+            echo "Waiting for MySQL to be ready..."
+            sleep 1
+          done
+      - name: Wait for Postgres
+        if: matrix.database == 'postgres'
+        run: |
+          until pg_isready -h "localhost" -U "postgres"; do
+            echo "Waiting for Postgres to be ready..."
+            sleep 1
+          done
       - name: Test
         run: bundle exec rake test
         # sqlite is not supported yet because it doesn't support
