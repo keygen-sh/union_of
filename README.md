@@ -62,14 +62,14 @@ end
 Here's a quick example of what's possible:
 
 ```ruby
-user           = User.create
-owned_license  = License.create(owner: user)
+user          = User.create
+owned_license = License.create(owner: user)
 
 3.times do
   shared_license = License.create
   license_user   = LicenseUser.create(license: shared_license, user:)
 end
-
+a
 user.licenses.to_a                # => [#<License id=1>, #<License id=2>, #<License id=3>, #<License id=4>]
 user.licenses.order(:id).limit(1) # => [#<License id=4>]
 user.licenses.where(id: 2)        # => [#<License id=2>]
@@ -87,7 +87,7 @@ User.includes(:licenses)
 ```
 
 There is support for complex unions as well, e.g. a union made up of direct and
-through associations, or even other union associations.
+through associations, even when those associations utilize union associations.
 
 ## Supported databases
 
@@ -105,7 +105,8 @@ pattern matching and a new shorthand hash syntax.
 As is expected, you will need to pay close attention to performance and ensure
 your tables are indexed well. We have tried to make the underlying `UNION`
 queries as efficient as possible, but please open an issue or PR if you are
-encountering a performance issue that is caused by this gem.
+encountering a performance issue that is caused by this gem. But good indexing
+will go a long way.
 
 We use Postgres in production, but we do not actively use MySQL or MariaDB, so
 there may be performance issues we are unaware of. If you stumble upon issues,
