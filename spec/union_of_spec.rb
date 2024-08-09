@@ -1136,7 +1136,7 @@ RSpec.describe UnionOf do
           owned_license_ids  = users.flat_map(&:license_ids).uniq
 
           expect(queries.first).to match_sql <<~SQL.squish
-            SELECT "users" . * FROM "users"
+            SELECT "users".* FROM "users"
           SQL
 
           expect(queries.second).to match_sql <<~SQL.squish
