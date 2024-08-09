@@ -47,7 +47,7 @@ jobs:
             echo "DATABASE_URL=sqlite3::memory:" >> $GITHUB_ENV
             ;;
           mysql)
-            echo "DATABASE_URL=mysql2://root:root@localhost/test" >> $GITHUB_ENV
+            echo "DATABASE_URL=mysql://root:root@localhost/test" >> $GITHUB_ENV
             ;;
           postgres)
             echo "DATABASE_URL=postgres://postgres:postgres@localhost/test" >> $GITHUB_ENV
