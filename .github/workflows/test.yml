@@ -15,8 +15,16 @@ jobs:
     strategy:
       matrix:
         ruby: ['3.3', '3.2', '3.1']
-        database: ['sqlite', 'mysql', 'postgres', 'mariadb']
+        database: ['sqlite', 'postgres', 'mysql', 'mariadb']
     services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
       mysql:
         image: mysql:8.0
         ports:
@@ -24,21 +32,13 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: test
-      postgres:
-        image: postgres:14
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test
       mariadb:
         image: 'mariadb:11'
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: test
         ports:
-          - 3306:3306
+          - 3307:3307
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,14 +53,14 @@ jobs:
           sqlite)
             echo "DATABASE_URL=sqlite3::memory:" >> $GITHUB_ENV
             ;;
-          mysql)
-            echo "DATABASE_URL=mysql://root:root@localhost:3306/test" >> $GITHUB_ENV
-            ;;
           postgres)
-            echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/test" >> $GITHUB_ENV
+            echo "DATABASE_URL=postgres://postgres:postgres@localhost/test" >> $GITHUB_ENV
+            ;;
+          mysql)
+            echo "DATABASE_URL=mysql2://root:root@localhost/test" >> $GITHUB_ENV
             ;;
           mariadb)
-            echo "DATABASE_URL=mariadb://root:root@localhost:3306/test" >> $GITHUB_ENV
+            echo "DATABASE_URL=mariadb://root:root@localhost:3307/test" >> $GITHUB_ENV
             ;;
           esac
       - name: Test
