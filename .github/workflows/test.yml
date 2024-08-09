@@ -60,7 +60,7 @@ jobs:
             echo "DATABASE_URL=mysql2://root:root@localhost/test" >> $GITHUB_ENV
             ;;
           mariadb)
-            echo "DATABASE_URL=mariadb://root:root@localhost:3307/test" >> $GITHUB_ENV
+            echo "DATABASE_URL=mysql2://root:root@localhost:3307/test" >> $GITHUB_ENV
             ;;
           esac
       - name: Test
