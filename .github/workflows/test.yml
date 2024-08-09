@@ -6,6 +6,9 @@ on:
   pull_request:
     branches:
       - master
+concurrency:
+  group: ${{github.workflow}}-${{github.event.pull_request.number || github.ref}}
+  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -21,11 +24,6 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: test
-        options: >-
-          --health-cmd "mysqladmin ping --silent"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
       postgres:
         image: postgres:14
         ports:
@@ -34,11 +32,6 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,33 +40,19 @@ jobs:
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
-      - name: Setup database configuration
+      - name: Setup database
         run: |
           case ${{matrix.database}} in
-            sqlite)
-              echo "DATABASE_URL=sqlite3::memory:" >> $GITHUB_ENV
-              ;;
-            mysql)
-              echo "DATABASE_URL=mysql2://root:root@localhost/test" >> $GITHUB_ENV
-              ;;
-            postgres)
-              echo "DATABASE_URL=postgres://postgres:postgres@localhost/test" >> $GITHUB_ENV
-              ;;
+          sqlite)
+            echo "DATABASE_URL=sqlite3::memory:" >> $GITHUB_ENV
+            ;;
+          mysql)
+            echo "DATABASE_URL=mysql2://root:root@localhost/test" >> $GITHUB_ENV
+            ;;
+          postgres)
+            echo "DATABASE_URL=postgres://postgres:postgres@localhost/test" >> $GITHUB_ENV
+            ;;
           esac
-      - name: Wait for MySQL
-        if: matrix.database == 'mysql'
-        run: |
-          until mysqladmin ping -h"localhost" --silent; do
-            echo "Waiting for MySQL to be ready..."
-            sleep 1
-          done
-      - name: Wait for Postgres
-        if: matrix.database == 'postgres'
-        run: |
-          until pg_isready -h "localhost" -U "postgres"; do
-            echo "Waiting for Postgres to be ready..."
-            sleep 1
-          done
       - name: Test
         run: bundle exec rake test
         # sqlite is not supported yet because it doesn't support
