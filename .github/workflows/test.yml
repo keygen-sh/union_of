@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         ruby: ['3.3', '3.2', '3.1']
-        database: ['sqlite', 'mysql', 'postgres']
+        database: ['sqlite', 'mysql', 'postgres', 'mariadb']
     services:
       mysql:
         image: mysql:8.0
@@ -32,6 +32,13 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
+      mariadb:
+        image: 'mariadb:11'
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: test
+        ports:
+          - 3306:3306
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,10 +54,13 @@ jobs:
             echo "DATABASE_URL=sqlite3::memory:" >> $GITHUB_ENV
             ;;
           mysql)
-            echo "DATABASE_URL=mysql://root:root@localhost/test" >> $GITHUB_ENV
+            echo "DATABASE_URL=mysql://root:root@localhost:3306/test" >> $GITHUB_ENV
             ;;
           postgres)
-            echo "DATABASE_URL=postgres://postgres:postgres@localhost/test" >> $GITHUB_ENV
+            echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/test" >> $GITHUB_ENV
+            ;;
+          mariadb)
+            echo "DATABASE_URL=mariadb://root:root@localhost:3306/test" >> $GITHUB_ENV
             ;;
           esac
       - name: Test
