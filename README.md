@@ -1,31 +1,109 @@
-# UnionOf
+# union_of
 
-TODO: Delete this and the text below, and describe your gem
+[![CI](https://github.com/keygen-sh/union_of/actions/workflows/test.yml/badge.svg)](https://github.com/keygen-sh/union_of/actions)
+[![Gem Version](https://badge.fury.io/rb/union_of.svg)](https://badge.fury.io/rb/union_of)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/union_of`. To experiment with that code, run `bin/console` for an interactive prompt.
+Use `union_of` to create unions of other associations in Active Record, using a
+SQL `UNION` under the hood. `union_of` has full support for joins, preloading,
+and eager loading of union associations.
+
+This gem was extracted from [Keygen](https://keygen.sh) and is being used in
+production to serve millions of API requests per day.
+
+Sponsored by:
+
+<a href="https://keygen.sh?ref=union_of">
+  <div>
+    <img src="https://keygen.sh/images/logo-pill.png" width="200" alt="Keygen">
+  </div>
+</a>
+
+_A fair source software licensing and distribution API._
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+Add this line to your application's `Gemfile`:
 
-Install the gem and add to the application's Gemfile by executing:
+```ruby
+gem 'union_of'
+```
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+And then execute:
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+```bash
+$ bundle
+```
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+Or install it yourself as:
+
+```bash
+$ gem install union_of
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+To use `union_of`, create a `has_many` association as you would normally, and
+define the associations you'd like to union together via `union_of:`:
 
-## Development
+```ruby
+class User < ActiveRecord::Base
+  has_many :owned_licenses
+  has_many :license_users
+  has_many :shared_licenses, through: :license_users, source: :license
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+  # create a union of the user's owned licenses and shared licenses
+  has_many :licenses, union_of: %i[
+    owned_licenses
+    shared_licenses
+  ]
+end
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+Here's a quick example of what's possible:
+
+```ruby
+user           = User.create
+owned_license  = License.create(owner: user)
+
+3.times do
+  shared_license = License.create
+  license_user   = LicenseUser.create(license: shared_license, user:)
+end
+
+user.licenses.to_a                # => [#<License id=1>, #<License id=2>, #<License id=3>, #<License id=4>]
+user.licenses.order(:id).limit(1) # => [#<License id=4>]
+user.licenses.where(id: 2)        # => [#<License id=2>]
+user.licenses.to_sql
+# => SELECT * FROM licenses WHERE id IN (
+#      SELECT id FROM licenses WHERE owner_id = ?
+#      UNION
+#      SELECT licenses.id FROM licenses INNER JOIN license_users ON licenses.id = license_users.license_id WHERE license_users.user_id = ?
+#    )
+
+User.joins(:licenses).where(licenses: { ... })
+User.preload(:licenses)
+User.eager_load(:licenses)
+User.includes(:licenses)
+```
+
+There is support for complex unions as well, e.g. a union made up of direct and
+through associations, or even other union associations.
+
+## Supported Rubies
+
+**`union_of` supports Ruby 3.1 and above.** We encourage you to upgrade if
+you're on an older version. Ruby 3 provides a lot of great features, like better
+pattern matching and a new shorthand hash syntax.
+
+## Is it any good?
+
+Yes.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/union_of.
+If you have an idea, or have discovered a bug, please open an issue or create a
+pull request.
+
+## License
+
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).

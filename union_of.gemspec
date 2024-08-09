@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "lib/union_of/version"
+require_relative 'lib/union_of/version'
 
 Gem::Specification.new do |spec|
   spec.name        = 'union_of'
@@ -16,7 +16,12 @@ Gem::Specification.new do |spec|
   spec.files                 = %w[LICENSE CHANGELOG.md CONTRIBUTING.md SECURITY.md README.md] + Dir.glob('lib/**/*')
   spec.require_paths         = ['lib']
 
-  spec.add_dependency 'rails', '>= 6.0'
+  spec.add_dependency 'rails', '>= 7.0'
 
   spec.add_development_dependency 'rspec-rails'
+  spec.add_development_dependency 'temporary_tables', '1.0.0.pre.rc.2'
+  spec.add_development_dependency 'sql_matchers', '1.0.0.pre.rc.1'
+  spec.add_development_dependency 'sqlite3', '~> 1.4'
+  spec.add_development_dependency 'mysql2'
+  spec.add_development_dependency 'pg'
 end
