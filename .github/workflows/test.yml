@@ -37,9 +37,8 @@ jobs:
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: test
-          MARIADB_PORT: 3307
         ports:
-          - 3307:3307
+          - 3307:3306 # avoid conflict w/ mysql
     steps:
       - name: Checkout
         uses: actions/checkout@v4
