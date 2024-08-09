@@ -7,9 +7,6 @@ Use `union_of` to create unions of other associations in Active Record, using a
 SQL `UNION` under the hood. `union_of` has full support for joins, preloading,
 and eager loading of union associations.
 
-We currently support PostgreSQL, MySQL, and MariaDB. We'd love contributions
-that add SQLite support, but we probably won't add it ourselves.
-
 This gem was extracted from [Keygen](https://keygen.sh) and is being used in
 production to serve millions of API requests per day.
 
@@ -92,7 +89,18 @@ User.includes(:licenses)
 There is support for complex unions as well, e.g. a union made up of direct and
 through associations, or even other union associations.
 
-## Performance
+## Supported databases
+
+We currently support PostgreSQL, MySQL, and MariaDB. We'd love contributions
+that add SQLite support, but we probably won't add it ourselves.
+
+## Supported Rubies
+
+**`union_of` supports Ruby 3.1 and above.** We encourage you to upgrade if
+you're on an older version. Ruby 3 provides a lot of great features, like better
+pattern matching and a new shorthand hash syntax.
+
+## Performance notes
 
 As is expected, you will need to pay close attention to performance and ensure
 your tables are indexed well. We have tried to make the underlying `UNION`
@@ -102,12 +110,6 @@ encountering a performance issue that is caused by this gem.
 We use Postgres in production, but we do not actively use MySQL or MariaDB, so
 there may be performance issues we are unaware of. If you stumble upon issues,
 please open an issue or a PR.
-
-## Supported Rubies
-
-**`union_of` supports Ruby 3.1 and above.** We encourage you to upgrade if
-you're on an older version. Ruby 3 provides a lot of great features, like better
-pattern matching and a new shorthand hash syntax.
 
 ## Is it any good?
 
