@@ -48,7 +48,7 @@ define the associations you'd like to union together via `union_of:`:
 ```ruby
 class User < ActiveRecord::Base
   has_many :owned_licenses
-  has_many :license_users
+  has_many :license_users # join table
   has_many :shared_licenses, through: :license_users, source: :license
 
   # create a union of the user's owned licenses and shared licenses
@@ -58,6 +58,11 @@ class User < ActiveRecord::Base
   ]
 end
 ```
+
+Right now, the underlying table for each unioned association must match. We'd
+like to change that in the future. Originally, `union_of` was defined to make
+migrating from a has-one relationship to a many-to-many relationship easier
+and safer, while retaining backwards compatibility.
 
 Here's a quick example of what's possible:
 
@@ -69,7 +74,7 @@ owned_license = License.create(owner: user)
   shared_license = License.create
   license_user   = LicenseUser.create(license: shared_license, user:)
 end
-a
+
 user.licenses.to_a                # => [#<License id=1>, #<License id=2>, #<License id=3>, #<License id=4>]
 user.licenses.order(:id).limit(1) # => [#<License id=4>]
 user.licenses.where(id: 2)        # => [#<License id=2>]
