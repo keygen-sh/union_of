@@ -186,20 +186,20 @@ RSpec.describe UnionOf do
     user_3           = User.create
     user_4           = User.create
 
-    owned_license_1  = License.create!(owner: user_1)
-    owned_license_2  = License.create!(owner: user_2)
-    owned_license_3  = License.create!(owner: user_3)
+    owned_license_1  = License.create(owner: user_1)
+    owned_license_2  = License.create(owner: user_2)
+    owned_license_3  = License.create(owner: user_3)
 
     shared_license_1 = License.create
     shared_license_2 = License.create
     shared_license_3 = License.create
     shared_license_4 = License.create
 
-    license_user_1   = LicenseUser.create!(license: shared_license_1, user: user_1)
-    license_user_2   = LicenseUser.create!(license: shared_license_2, user: user_1)
-    license_user_3   = LicenseUser.create!(license: shared_license_3, user: user_2)
-    license_user_4   = LicenseUser.create!(license: shared_license_3, user: user_1)
-    license_user_5   = LicenseUser.create!(license: shared_license_4, user: user_2)
+    license_user_1   = LicenseUser.create(license: shared_license_1, user: user_1)
+    license_user_2   = LicenseUser.create(license: shared_license_2, user: user_1)
+    license_user_3   = LicenseUser.create(license: shared_license_3, user: user_2)
+    license_user_4   = LicenseUser.create(license: shared_license_3, user: user_1)
+    license_user_5   = LicenseUser.create(license: shared_license_4, user: user_2)
 
     expect(user_1.licenses.to_a).to eq [owned_license_1, shared_license_1, shared_license_2, shared_license_3]
     expect(user_2.licenses.to_a).to eq [owned_license_2, shared_license_3, shared_license_4]
@@ -213,20 +213,20 @@ RSpec.describe UnionOf do
     user_3           = User.create
     user_4           = User.create
 
-    owned_license_1  = License.create!(owner: user_1)
-    owned_license_2  = License.create!(owner: user_2)
-    owned_license_3  = License.create!(owner: user_3)
+    owned_license_1  = License.create(owner: user_1)
+    owned_license_2  = License.create(owner: user_2)
+    owned_license_3  = License.create(owner: user_3)
 
     shared_license_1 = License.create
     shared_license_2 = License.create
     shared_license_3 = License.create
     shared_license_4 = License.create
 
-    license_user_1   = LicenseUser.create!(license: shared_license_1, user: user_1)
-    license_user_2   = LicenseUser.create!(license: shared_license_2, user: user_1)
-    license_user_3   = LicenseUser.create!(license: shared_license_3, user: user_2)
-    license_user_4   = LicenseUser.create!(license: shared_license_3, user: user_1)
-    license_user_5   = LicenseUser.create!(license: shared_license_4, user: user_2)
+    license_user_1   = LicenseUser.create(license: shared_license_1, user: user_1)
+    license_user_2   = LicenseUser.create(license: shared_license_2, user: user_1)
+    license_user_3   = LicenseUser.create(license: shared_license_3, user: user_2)
+    license_user_4   = LicenseUser.create(license: shared_license_3, user: user_1)
+    license_user_5   = LicenseUser.create(license: shared_license_4, user: user_2)
 
     expect(user_1.license_ids).to eq [owned_license_1.id, shared_license_1.id, shared_license_2.id, shared_license_3.id]
     expect(user_2.license_ids).to eq [owned_license_2.id, shared_license_3.id, shared_license_4.id]
@@ -359,9 +359,9 @@ RSpec.describe UnionOf do
 
   it 'should preload with association scopes', :unprepared_statements do
     user           = User.create
-    owned_license  = License.create!(owner: user)
+    owned_license  = License.create(owner: user)
     shared_license = License.create
-    license_user   = LicenseUser.create!(license: shared_license, user:)
+    license_user   = LicenseUser.create(license: shared_license, user:)
 
     travel_to Time.parse('2024-03-08 01:23:45 UTC') do |t|
       expect { User.preload(:any_active_licenses).where(id: user.id) }.to(
@@ -444,9 +444,9 @@ RSpec.describe UnionOf do
     end
 
     it 'should produce a query with default scopes', :unprepared_statements do
-      user    = User.create!(account:)
-      license = License.create!(owner: user, account:)
-      machine = Machine.create!(license:, account:)
+      user    = User.create(account:)
+      license = License.create(owner: user, account:)
+      machine = Machine.create(license:, account:)
 
       Current.account = account
 
@@ -520,8 +520,8 @@ RSpec.describe UnionOf do
 
   it 'should produce a through has-many union query', :unprepared_statements do
     user    = User.create
-    license = License.create!(owner: user)
-    machine = Machine.create!(license:)
+    license = License.create(owner: user)
+    machine = Machine.create(license:)
 
     expect { user.machines }.to(
       match_queries(count: 2) do |queries|
@@ -566,8 +566,8 @@ RSpec.describe UnionOf do
 
   it 'should produce a through has-one union query' do
     user     = User.create
-    license  = License.create!(owner: user)
-    machine  = Machine.create!(license:)
+    license  = License.create(owner: user)
+    machine  = Machine.create(license:)
 
     expect(machine.users.to_sql).to match_sql <<~SQL.squish
       SELECT
@@ -602,9 +602,9 @@ RSpec.describe UnionOf do
 
   it 'should produce a deep union query', :unprepared_statements do
     user     = User.create
-    license  = License.create!(owner: user)
-    machine  = Machine.create!(license:)
-    hardware = Hardware.create!(machine:)
+    license  = License.create(owner: user)
+    machine  = Machine.create(license:)
+    hardware = Hardware.create(machine:)
 
     expect { user.hardwares }.to(
       match_queries(count: 2) do |queries|
@@ -685,13 +685,13 @@ RSpec.describe UnionOf do
     it 'should support querying a union' do
       user           = User.create
       other_user     = User.create
-      owned_license  = License.create!(owner: user)
+      owned_license  = License.create(owner: user)
       user_license_1 = License.create
       user_license_2 = License.create
 
-      LicenseUser.create!(license: owned_license, user: other_user)
-      LicenseUser.create!(license: user_license_1, user:)
-      LicenseUser.create!(license: user_license_2, user:)
+      LicenseUser.create(license: owned_license, user: other_user)
+      LicenseUser.create(license: user_license_1, user:)
+      LicenseUser.create(license: user_license_2, user:)
 
       expect(owned_license.users.count).to eq 2
       expect(owned_license.users).to satisfy { _1.to_a in [user, other_user] }
@@ -711,18 +711,18 @@ RSpec.describe UnionOf do
 
       user           = User.create
       other_user     = User.create
-      owned_license  = License.create!(product: product_1, owner: user)
-      user_license_1 = License.create!(product: product_2)
-      user_license_2 = License.create!(product: product_2)
+      owned_license  = License.create(product: product_1, owner: user)
+      user_license_1 = License.create(product: product_2)
+      user_license_2 = License.create(product: product_2)
 
-      LicenseUser.create!(license: owned_license, user: other_user)
-      LicenseUser.create!(license: user_license_1, user:)
-      LicenseUser.create!(license: user_license_2, user:)
+      LicenseUser.create(license: owned_license, user: other_user)
+      LicenseUser.create(license: user_license_1, user:)
+      LicenseUser.create(license: user_license_2, user:)
 
-      machine_1 = Machine.create!(license: user_license_1, owner: user)
-      machine_2 = Machine.create!(license: user_license_2, owner: user)
-      machine_3 = Machine.create!(license: owned_license, owner: user)
-      machine_4 = Machine.create!(license: owned_license, owner: other_user)
+      machine_1 = Machine.create(license: user_license_1, owner: user)
+      machine_2 = Machine.create(license: user_license_2, owner: user)
+      machine_3 = Machine.create(license: owned_license, owner: user)
+      machine_4 = Machine.create(license: owned_license, owner: other_user)
 
       expect(user.products.count).to eq 2
       expect(user.products).to satisfy { _1.to_a in [product_1, product_2] }
@@ -751,13 +751,13 @@ RSpec.describe UnionOf do
     it 'should support counting a union' do
       user           = User.create
       other_user     = User.create
-      owned_license  = License.create!(owner: user)
+      owned_license  = License.create(owner: user)
       user_license_1 = License.create
       user_license_2 = License.create
 
-      LicenseUser.create!(license: owned_license, user: other_user)
-      LicenseUser.create!(license: user_license_1, user:)
-      LicenseUser.create!(license: user_license_2, user:)
+      LicenseUser.create(license: owned_license, user: other_user)
+      LicenseUser.create(license: user_license_1, user:)
+      LicenseUser.create(license: user_license_2, user:)
 
       expect(owned_license.users.load.count).to eq(2)
       expect { owned_license.users.count }.to match_queries(count: 1)
@@ -766,13 +766,13 @@ RSpec.describe UnionOf do
     it 'should support sizing a union' do
       user           = User.create
       other_user     = User.create
-      owned_license  = License.create!(owner: user)
+      owned_license  = License.create(owner: user)
       user_license_1 = License.create
       user_license_2 = License.create
 
-      LicenseUser.create!(license: owned_license, user: other_user)
-      LicenseUser.create!(license: user_license_1, user:)
-      LicenseUser.create!(license: user_license_2, user:)
+      LicenseUser.create(license: owned_license, user: other_user)
+      LicenseUser.create(license: user_license_1, user:)
+      LicenseUser.create(license: user_license_2, user:)
 
       expect(owned_license.users.load.size).to eq(2)
       expect { owned_license.users.size }.to match_queries(count: 0)
@@ -785,15 +785,15 @@ RSpec.describe UnionOf do
       user_2 = User.create
       user_3 = User.create
 
-      license_1 = License.create!(owner: user_1)
-      license_2 = License.create!(owner: user_2)
+      license_1 = License.create(owner: user_1)
+      license_2 = License.create(owner: user_2)
       license_3 = License.create
       license_4 = License.create
       license_5 = License.create
 
-      LicenseUser.create!(license: license_1, user: user_2)
-      LicenseUser.create!(license: license_3, user: user_1)
-      LicenseUser.create!(license: license_4, user: user_1)
+      LicenseUser.create(license: license_1, user: user_2)
+      LicenseUser.create(license: license_3, user: user_1)
+      LicenseUser.create(license: license_4, user: user_1)
 
       expect(User.distinct.joins(:licenses).where(licenses: { id: license_1 }).count).to eq 2
       expect(User.distinct.joins(:licenses).where(licenses: { id: license_2 }).count).to eq 1
@@ -824,40 +824,40 @@ RSpec.describe UnionOf do
       user_2 = User.create
       user_3 = User.create
 
-      license_1 = License.create!(product: product_1, owner: user_1)
-      license_2 = License.create!(product: product_1, owner: user_2)
-      license_3 = License.create!(product: product_2)
-      license_4 = License.create!(product: product_2)
-      license_5 = License.create!(product: product_2)
+      license_1 = License.create(product: product_1, owner: user_1)
+      license_2 = License.create(product: product_1, owner: user_2)
+      license_3 = License.create(product: product_2)
+      license_4 = License.create(product: product_2)
+      license_5 = License.create(product: product_2)
 
-      LicenseUser.create!(license: license_1, user: user_2)
-      LicenseUser.create!(license: license_3, user: user_1)
-      LicenseUser.create!(license: license_4, user: user_1)
+      LicenseUser.create(license: license_1, user: user_2)
+      LicenseUser.create(license: license_3, user: user_1)
+      LicenseUser.create(license: license_4, user: user_1)
 
-      machine_1 = Machine.create!(license: license_3, owner: user_1)
-      machine_2 = Machine.create!(license: license_4)
-      machine_3 = Machine.create!(license: license_1, owner: user_1)
-      machine_4 = Machine.create!(license: license_1, owner: user_2)
-      machine_5 = Machine.create!(license: license_2, owner: user_2)
-      machine_6 = Machine.create!(license: license_5)
+      machine_1 = Machine.create(license: license_3, owner: user_1)
+      machine_2 = Machine.create(license: license_4)
+      machine_3 = Machine.create(license: license_1, owner: user_1)
+      machine_4 = Machine.create(license: license_1, owner: user_2)
+      machine_5 = Machine.create(license: license_2, owner: user_2)
+      machine_6 = Machine.create(license: license_5)
 
-      hardware_1 = Hardware.create!(machine: machine_1)
-      hardware_2 = Hardware.create!(machine: machine_4)
-      hardware_3 = Hardware.create!(machine: machine_4)
-      hardware_4 = Hardware.create!(machine: machine_4)
-      hardware_5 = Hardware.create!(machine: machine_5)
-      hardware_6 = Hardware.create!(machine: machine_5)
+      hardware_1 = Hardware.create(machine: machine_1)
+      hardware_2 = Hardware.create(machine: machine_4)
+      hardware_3 = Hardware.create(machine: machine_4)
+      hardware_4 = Hardware.create(machine: machine_4)
+      hardware_5 = Hardware.create(machine: machine_5)
+      hardware_6 = Hardware.create(machine: machine_5)
 
-      release_1 = Release.create!(product: product_1)
-      release_2 = Release.create!(product: product_1)
-      release_3 = Release.create!(product: product_1)
-      release_4 = Release.create!(product: product_2)
+      release_1 = Release.create(product: product_1)
+      release_2 = Release.create(product: product_1)
+      release_3 = Release.create(product: product_1)
+      release_4 = Release.create(product: product_2)
 
-      artifact_1 = Artifact.create!(release: release_1)
-      artifact_2 = Artifact.create!(release: release_1)
-      artifact_3 = Artifact.create!(release: release_2)
-      artifact_4 = Artifact.create!(release: release_2)
-      artifact_5 = Artifact.create!(release: release_4)
+      artifact_1 = Artifact.create(release: release_1)
+      artifact_2 = Artifact.create(release: release_1)
+      artifact_3 = Artifact.create(release: release_2)
+      artifact_4 = Artifact.create(release: release_2)
+      artifact_5 = Artifact.create(release: release_4)
 
       expect(User.distinct.joins(:products).where(products: { id: product_1 }).count).to eq 2
       expect(User.distinct.joins(:products).where(products: { id: product_2 }).count).to eq 1
@@ -943,58 +943,58 @@ RSpec.describe UnionOf do
       # license with no owner
       license = License.create
 
-      Machine.create!(license:)
+      Machine.create(license:)
 
       # user with owned license
-      owner   = User.create!(created_at: 1.year.ago)
-      license = License.create!(owner:, created_at: 1.week.ago)
+      owner   = User.create(created_at: 1.year.ago)
+      license = License.create(owner:, created_at: 1.week.ago)
 
-      Machine.create!(license:, owner:)
+      Machine.create(license:, owner:)
 
       # user with user license
-      user    = User.create!(created_at: 1.minute.ago)
-      license = License.create!(created_at: 1.month.ago)
+      user    = User.create(created_at: 1.minute.ago)
+      license = License.create(created_at: 1.month.ago)
 
-      LicenseUser.create!(license:, user:, created_at: 2.weeks.ago)
-      Machine.create!(license:, created_at: 1.week.ago)
+      LicenseUser.create(license:, user:, created_at: 2.weeks.ago)
+      Machine.create(license:, created_at: 1.week.ago)
 
       # user with 2 user licenses
-      user    = User.create!(created_at: 1.week.ago)
-      license = License.create!(created_at: 1.week.ago)
+      user    = User.create(created_at: 1.week.ago)
+      license = License.create(created_at: 1.week.ago)
 
-      LicenseUser.create!(license:, user:, created_at: 1.week.ago)
-      Machine.create!(license:, owner: user, created_at: 1.second.ago)
+      LicenseUser.create(license:, user:, created_at: 1.week.ago)
+      Machine.create(license:, owner: user, created_at: 1.second.ago)
 
-      license = License.create!(created_at: 1.year.ago)
+      license = License.create(created_at: 1.year.ago)
 
-      LicenseUser.create!(license:, user:, created_at: 1.year.ago)
+      LicenseUser.create(license:, user:, created_at: 1.year.ago)
 
       # user with 1 owned and 2 user licenses
-      user    = User.create!(created_at: 1.week.ago)
-      license = License.create!(owner:, created_at: 1.week.ago)
+      user    = User.create(created_at: 1.week.ago)
+      license = License.create(owner:, created_at: 1.week.ago)
 
-      license = License.create!(created_at: 1.week.ago)
+      license = License.create(created_at: 1.week.ago)
 
-      LicenseUser.create!(license:, user:, created_at: 1.week.ago)
-      Machine.create!(license:, owner: user, created_at: 1.second.ago)
+      LicenseUser.create(license:, user:, created_at: 1.week.ago)
+      Machine.create(license:, owner: user, created_at: 1.second.ago)
 
-      license = License.create!(created_at: 1.year.ago)
+      license = License.create(created_at: 1.year.ago)
 
-      LicenseUser.create!(license:, user:, created_at: 1.year.ago)
+      LicenseUser.create(license:, user:, created_at: 1.year.ago)
 
       # license with owner and 2 users
-      owner   = User.create!(created_at: 1.year.ago)
-      license = License.create!(owner:, created_at: 1.year.ago)
+      owner   = User.create(created_at: 1.year.ago)
+      license = License.create(owner:, created_at: 1.year.ago)
 
-      Machine.create!(license:, owner:)
+      Machine.create(license:, owner:)
 
-      user = User.create!(created_at: 1.week.ago)
-      LicenseUser.create!(license:, user:, created_at: 1.week.ago)
-      Machine.create!(license:, owner: user)
+      user = User.create(created_at: 1.week.ago)
+      LicenseUser.create(license:, user:, created_at: 1.week.ago)
+      Machine.create(license:, owner: user)
 
-      user = User.create!(created_at: 1.year.ago)
-      LicenseUser.create!(license:, user:, created_at: 1.year.ago)
-      Machine.create!(license:, owner: user)
+      user = User.create(created_at: 1.year.ago)
+      LicenseUser.create(license:, user:, created_at: 1.year.ago)
+      Machine.create(license:, owner: user)
     end
 
     it 'should support eager loading a union' do
@@ -1274,8 +1274,8 @@ RSpec.describe UnionOf do
     end
 
     it 'should raise on create' do
-      expect { subject.licenses.create!(id: SecureRandom.uuid) }.to raise_error UnionOf::ReadonlyAssociationError
-      expect { subject.licenses.create!(id: SecureRandom.uuid) }.to raise_error UnionOf::ReadonlyAssociationError
+      expect { subject.licenses.create(id: SecureRandom.uuid) }.to raise_error UnionOf::ReadonlyAssociationError
+      expect { subject.licenses.create(id: SecureRandom.uuid) }.to raise_error UnionOf::ReadonlyAssociationError
     end
 
     it 'should raise on insert' do
