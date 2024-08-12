@@ -108,7 +108,7 @@ Illustration.create(user: illustrator, book:)
 # assign an editor
 Edit.create(user: editor, book:)
 
-# access all contributors (author, editor, illustrator, etc.)
+# access all contributors (author, editors, illustrator, etc.)
 book.contributors.to_a
 # => [#<User id=1, name="Isaac Asimov">, #<User id=2, name="John W. Campbell">, #<User id=3, name="Frank Kelly Freas">, #<User id=4, name="Ray Bradbury">]
 
@@ -121,13 +121,15 @@ book.contributors.where(id: editor.id)
 
 book.contributors.to_sql
 # => SELECT * FROM users WHERE id IN (
-#      SELECT id FROM users WHERE id = ?
+#      SELECT id FROM users WHERE id = 1
 #      UNION
-#      SELECT users.id FROM users INNER JOIN edits ON users.id = edits.user_id WHERE edits.book_id = ?
+#      SELECT users.id FROM users INNER JOIN prefaces ON users.id = prefaces.user_id WHERE prefaces.book_id = 1
 #      UNION
-#      SELECT users.id FROM users INNER JOIN illustrations ON users.id = illustrations.user_id WHERE illustrations.book_id = ?
+#      SELECT users.id FROM users INNER JOIN forewords ON users.id = forewords.user_id WHERE forewords.book_id = 1
 #      UNION
-#      SELECT users.id FROM users INNER JOIN forewords ON users.id = forewords.user_id WHERE forewords.book_id = ?
+#      SELECT users.id FROM users INNER JOIN illustrations ON users.id = illustrations.user_id WHERE illustrations.book_id = 1
+#      UNION
+#      SELECT users.id FROM users INNER JOIN edits ON users.id = edits.user_id WHERE edits.book_id = 1
 #   )
 
 # example of more advanced querying e.g. preloading the union
