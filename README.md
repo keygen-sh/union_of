@@ -43,8 +43,9 @@ $ gem install union_of
 
 ## Usage
 
-To use `union_of`, create a `has_many` association as you would normally, and
-define the associations you'd like to union together via `union_of:`:
+To use `union_of`, define a `has_many` association as you would normally, and
+provide the associations you'd like to union together via the `union_of:`
+keyword:
 
 ```ruby
 class Book < ActiveRecord::Base
