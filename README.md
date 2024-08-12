@@ -64,31 +64,30 @@ class Book < ActiveRecord::Base
 
   # foreword writers for the book via a join table
   has_many :forewords
-  has_many :foreword_writers, through: :forewords, source: :user
+  has_many :prefacers, through: :forewords, source: :user
 
   # union association for all contributors to the book
-  has_many :contributors, union_of: %i[
+  has_many :contributors, class_name: 'User', union_of: %i[
     author
     coauthors
     editors
     illustrators
-    foreword_writers
+    prefacers
   ]
 end
-
 ```
 
 Here's a quick example of what's possible:
 
 ```ruby
 # contributors to the book
-primary_author = User.create(name: 'Isaac Asimov')
+author = User.create(name: 'Isaac Asimov')
 editor = User.create(name: 'John W. Campbell')
 illustrator = User.create(name: 'Frank Kelly Freas')
 writer = User.create(name: 'Ray Bradbury')
 
 # create book by the author
-book = Book.create(title: 'I, Robot', primary_author:)
+book = Book.create(title: 'I, Robot', author:)
 
 # assign an editor
 Edit.create(user: editor, book:)
@@ -99,7 +98,7 @@ Illustration.create(user: illustrator, book:)
 # assign a foreword writer
 Foreword.create(user: writer, book:)
 
-# access all contributors (primary author, editor, illustrator, foreword writer)
+# access all contributors (author, editor, illustrator, etc.)
 book.contributors.to_a
 # => [#<User id=1, name="Isaac Asimov">, #<User id=2, name="John W. Campbell">, #<User id=3, name="Frank Kelly Freas">, #<User id=4, name="Ray Bradbury">]
 

@@ -1309,4 +1309,198 @@ RSpec.describe UnionOf do
 
   # TODO(ezekg) Add exhaustive tests for all association macros, e.g.
   #             belongs_to, has_many, etc.
+
+  describe 'README' do
+    temporary_table :users, force: true do |t|
+      t.string :name
+    end
+
+    temporary_table :books do |t|
+      t.integer :author_id
+      t.string :title
+    end
+
+    temporary_table :coauthorships do |t|
+      t.integer :book_id
+      t.integer :user_id
+    end
+
+    temporary_table :edits do |t|
+      t.integer :book_id
+      t.integer :user_id
+    end
+
+    temporary_table :illustrations do |t|
+      t.integer :book_id
+      t.integer :user_id
+    end
+
+    temporary_table :forewords do |t|
+      t.integer :book_id
+      t.integer :user_id
+    end
+
+    temporary_model :user do
+      has_many :books
+      has_many :coauthorships
+      has_many :edits
+      has_many :illustrations
+      has_many :forewords
+    end
+
+    temporary_model :coauthorship do
+      belongs_to :book
+      belongs_to :user
+    end
+
+    temporary_model :edit do
+      belongs_to :book
+      belongs_to :user
+    end
+
+    temporary_model :illustration do
+      belongs_to :book
+      belongs_to :user
+    end
+
+    temporary_model :foreword do
+      belongs_to :book
+      belongs_to :user
+    end
+
+    temporary_model :book do
+      # the primary author of the book
+      belongs_to :author, class_name: 'User', foreign_key: 'author_id', optional: true
+
+      # coauthors of the book via a join table
+      has_many :coauthorships
+      has_many :coauthors, through: :coauthorships, source: :user
+
+      # editors for the book via a join table
+      has_many :edits
+      has_many :editors, through: :edits, source: :user
+
+      # illustrators for the book via a join table
+      has_many :illustrations
+      has_many :illustrators, through: :illustrations, source: :user
+
+      # foreword writers for the book via a join table
+      has_many :forewords
+      has_many :prefacers, through: :forewords, source: :user
+
+      # union association for all contributors to the book
+      has_many :contributors, class_name: 'User', union_of: %i[
+        author
+        coauthors
+        editors
+        illustrators
+        prefacers
+      ]
+    end
+
+    let(:author) { User.create(name: 'Isaac Asimov') }
+    let(:editor) { User.create(name: 'John W. Campbell') }
+    let(:illustrator) { User.create(name: 'Frank Kelly Freas') }
+    let(:writer) { User.create(name: 'Ray Bradbury') }
+    let(:book) {
+      book = Book.create(title: 'I, Robot', author:)
+
+      Edit.create(user: editor, book:)
+      Illustration.create(user: illustrator, book:)
+      Foreword.create(user: writer, book:)
+
+      book
+    }
+
+    it 'should return contributors' do
+      expect(book.contributors).to satisfy { _1.to_a in [author, editor, illustrator, writer] }
+    end
+
+    it 'should use limit' do
+      expect(book.contributors.order(:name).limit(3)).to satisfy { _1.to_a in [author, editor, illustrator] }
+    end
+
+    it 'should use predicate' do
+      expect(book.contributors.where(id: editor.id)).to satisfy { _1.to_a in [editor] }
+    end
+
+    it 'should use UNION' do
+      expect(book.contributors.to_sql).to match_sql <<~SQL.squish
+        SELECT
+          users.*
+        FROM
+          users
+        WHERE
+          users.id IN (
+            SELECT
+              users.id
+            FROM
+              (
+                (
+                  SELECT
+                    users.id
+                  FROM
+                    users
+                  WHERE
+                    users.id = 1
+                  LIMIT
+                    1
+                )
+                UNION
+                (
+                  SELECT
+                    users.id
+                  FROM
+                    users INNER JOIN coauthorships ON users.id = coauthorships.user_id
+                  WHERE
+                    coauthorships.book_id = 1
+                )
+                UNION
+                (
+                  SELECT
+                    users.id
+                  FROM
+                    users INNER JOIN edits ON users.id = edits.user_id
+                  WHERE
+                    edits.book_id = 1
+                )
+                UNION
+                (
+                  SELECT
+                    users.id
+                  FROM
+                    users INNER JOIN illustrations ON users.id = illustrations.user_id
+                  WHERE
+                    illustrations.book_id = 1
+                )
+                UNION
+                (
+                  SELECT
+                    users.id
+                  FROM
+                    users INNER JOIN forewords ON users.id = forewords.user_id
+                  WHERE
+                    forewords.book_id = 1
+                )
+              ) users
+          )
+      SQL
+    end
+
+    it 'should support joins' do
+      expect { Book.joins(:contributors).where(contributors: { user_id: author.id }) }.to_not raise_error
+    end
+
+    it 'should support preloading' do
+      expect { Book.preload(:contributors) }.to_not raise_error
+    end
+
+    it 'should support eager loading' do
+      expect { Book.eager_load(:contributors) }.to_not raise_error
+    end
+
+    it 'should support includes' do
+      expect { Book.includes(:contributors) }.to_not raise_error
+    end
+  end
 end
