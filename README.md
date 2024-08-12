@@ -3,9 +3,9 @@
 [![CI](https://github.com/keygen-sh/union_of/actions/workflows/test.yml/badge.svg)](https://github.com/keygen-sh/union_of/actions)
 [![Gem Version](https://badge.fury.io/rb/union_of.svg)](https://badge.fury.io/rb/union_of)
 
-Use `union_of` to create unions of other associations in Active Record, using a
-SQL `UNION` under the hood. `union_of` has full support for joins, preloading,
-and eager loading of union associations.
+Use `union_of` to create associations that combine multiple Active Record
+associations using a SQL `UNION` under the hood. `union_of` fully supports
+joins, preloading, and eager loading, as well as through-union associations.
 
 This gem was extracted from [Keygen](https://keygen.sh) and is being used in
 production to serve millions of API requests per day.
