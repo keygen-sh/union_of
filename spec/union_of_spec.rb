@@ -1415,6 +1415,7 @@ RSpec.describe UnionOf do
 
       Preface.create(user: author, book:)
       Foreword.create(user: writer, book:)
+      Foreword.create(user: editor, book:)
       Illustration.create(user: illustrator, book:)
       Edit.create(user: editor, book:)
 

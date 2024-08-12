@@ -97,8 +97,9 @@ book = Book.create(title: 'I, Robot', author:)
 # assign a preface by the author
 Preface.create(user: author, book:)
 
-# assign a foreword writer
+# assign foreword writers
 Foreword.create(user: writer, book:)
+Foreword.create(user: editor, book:)
 
 # assign an illustrator
 Illustration.create(user: illustrator, book:)
