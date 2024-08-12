@@ -8,7 +8,8 @@ associations using a SQL `UNION` under the hood. `union_of` fully supports
 joins, preloading, and eager loading, as well as through-union associations.
 
 This gem was extracted from [Keygen](https://keygen.sh) and is being used in
-production to serve millions of API requests per day.
+production to serve millions of API requests per day, performantly querying
+tables with millions and millions of rows.
 
 Sponsored by:
 
