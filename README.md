@@ -54,25 +54,30 @@ class Book < ActiveRecord::Base
   has_many :coauthorships
   has_many :coauthors, through: :coauthorships, source: :user
 
-  # editors for the book via a join table
-  has_many :edits
-  has_many :editors, through: :edits, source: :user
+  # prefacers for the book via a join table
+  has_many :prefaces
+  has_many :prefacers, through: :prefaces, source: :user
+
+  # prefacers for the book via a join table
+  has_many :forewords
+  has_many :foreworders, through: :forewords, source: :user
 
   # illustrators for the book via a join table
   has_many :illustrations
   has_many :illustrators, through: :illustrations, source: :user
 
-  # foreword writers for the book via a join table
-  has_many :forewords
-  has_many :prefacers, through: :forewords, source: :user
+  # editors for the book via a join table
+  has_many :edits
+  has_many :editors, through: :edits, source: :user
 
   # union association for all contributors to the book
-  has_many :contributors, class_name: 'User', union_of: %i[
+  has_many :contributors, -> { distinct }, class_name: 'User', union_of: %i[
     author
     coauthors
-    editors
-    illustrators
+    foreworders
     prefacers
+    illustrators
+    editors
   ]
 end
 ```
@@ -89,14 +94,17 @@ writer = User.create(name: 'Ray Bradbury')
 # create book by the author
 book = Book.create(title: 'I, Robot', author:)
 
-# assign an editor
-Edit.create(user: editor, book:)
+# assign a preface by the author
+Preface.create(user: author, book:)
+
+# assign a foreword writer
+Foreword.create(user: writer, book:)
 
 # assign an illustrator
 Illustration.create(user: illustrator, book:)
 
-# assign a foreword writer
-Foreword.create(user: writer, book:)
+# assign an editor
+Edit.create(user: editor, book:)
 
 # access all contributors (author, editor, illustrator, etc.)
 book.contributors.to_a

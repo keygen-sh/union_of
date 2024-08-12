@@ -1340,6 +1340,11 @@ RSpec.describe UnionOf do
       t.integer :user_id
     end
 
+    temporary_table :prefaces do |t|
+      t.integer :book_id
+      t.integer :user_id
+    end
+
     temporary_model :user do
       has_many :books
       has_many :coauthorships
@@ -1368,33 +1373,36 @@ RSpec.describe UnionOf do
       belongs_to :user
     end
 
+    temporary_model :preface do
+      belongs_to :book
+      belongs_to :user
+    end
+
     temporary_model :book do
-      # the primary author of the book
       belongs_to :author, class_name: 'User', foreign_key: 'author_id', optional: true
 
-      # coauthors of the book via a join table
       has_many :coauthorships
       has_many :coauthors, through: :coauthorships, source: :user
 
-      # editors for the book via a join table
-      has_many :edits
-      has_many :editors, through: :edits, source: :user
+      has_many :prefaces
+      has_many :prefacers, through: :prefaces, source: :user
 
-      # illustrators for the book via a join table
+      has_many :forewords
+      has_many :foreworders, through: :forewords, source: :user
+
       has_many :illustrations
       has_many :illustrators, through: :illustrations, source: :user
 
-      # foreword writers for the book via a join table
-      has_many :forewords
-      has_many :prefacers, through: :forewords, source: :user
+      has_many :edits
+      has_many :editors, through: :edits, source: :user
 
-      # union association for all contributors to the book
-      has_many :contributors, class_name: 'User', union_of: %i[
+      has_many :contributors, -> { distinct }, class_name: 'User', union_of: %i[
         author
         coauthors
-        editors
-        illustrators
+        foreworders
         prefacers
+        illustrators
+        editors
       ]
     end
 
@@ -1405,9 +1413,10 @@ RSpec.describe UnionOf do
     let(:book) {
       book = Book.create(title: 'I, Robot', author:)
 
-      Edit.create(user: editor, book:)
-      Illustration.create(user: illustrator, book:)
+      Preface.create(user: author, book:)
       Foreword.create(user: writer, book:)
+      Illustration.create(user: illustrator, book:)
+      Edit.create(user: editor, book:)
 
       book
     }
@@ -1427,7 +1436,7 @@ RSpec.describe UnionOf do
     it 'should use UNION' do
       expect(book.contributors.to_sql).to match_sql <<~SQL.squish
         SELECT
-          users.*
+          DISTINCT users.*
         FROM
           users
         WHERE
@@ -1460,9 +1469,18 @@ RSpec.describe UnionOf do
                   SELECT
                     users.id
                   FROM
-                    users INNER JOIN edits ON users.id = edits.user_id
+                    users INNER JOIN forewords ON users.id = forewords.user_id
                   WHERE
-                    edits.book_id = 1
+                    forewords.book_id = 1
+                )
+                UNION
+                (
+                  SELECT
+                    users.id
+                  FROM
+                    users INNER JOIN prefaces ON users.id = prefaces.user_id
+                  WHERE
+                    prefaces.book_id = 1
                 )
                 UNION
                 (
@@ -1478,9 +1496,9 @@ RSpec.describe UnionOf do
                   SELECT
                     users.id
                   FROM
-                    users INNER JOIN forewords ON users.id = forewords.user_id
+                    users INNER JOIN edits ON users.id = edits.user_id
                   WHERE
-                    forewords.book_id = 1
+                    edits.book_id = 1
                 )
               ) users
           )
