@@ -46,50 +46,92 @@ To use `union_of`, create a `has_many` association as you would normally, and
 define the associations you'd like to union together via `union_of:`:
 
 ```ruby
-class User < ActiveRecord::Base
-  has_many :owned_licenses
-  has_many :license_users # join table
-  has_many :shared_licenses, through: :license_users, source: :license
+class Book < ActiveRecord::Base
+  # the primary author of the book
+  belongs_to :author, class_name: 'User', foreign_key: 'author_id', optional: true
 
-  # create a union of the user's owned licenses and shared licenses
-  has_many :licenses, union_of: %i[
-    owned_licenses
-    shared_licenses
+  # coauthors of the book via a join table
+  has_many :coauthorships
+  has_many :coauthors, through: :coauthorships, source: :user
+
+  # editors for the book via a join table
+  has_many :edits
+  has_many :editors, through: :edits, source: :user
+
+  # illustrators for the book via a join table
+  has_many :illustrations
+  has_many :illustrators, through: :illustrations, source: :user
+
+  # foreword writers for the book via a join table
+  has_many :forewords
+  has_many :foreword_writers, through: :forewords, source: :user
+
+  # union association for all contributors to the book
+  has_many :contributors, union_of: %i[
+    author
+    coauthors
+    editors
+    illustrators
+    foreword_writers
   ]
 end
+
+```
+
+Here's a quick example of what's possible:
+
+```ruby
+# contributors to the book
+primary_author = User.create(name: 'Isaac Asimov')
+editor = User.create(name: 'John W. Campbell')
+illustrator = User.create(name: 'Frank Kelly Freas')
+writer = User.create(name: 'Ray Bradbury')
+
+# create book by the author
+book = Book.create(title: 'I, Robot', primary_author:)
+
+# assign an editor
+Edit.create(user: editor, book:)
+
+# assign an illustrator
+Illustration.create(user: illustrator, book:)
+
+# assign a foreword writer
+Foreword.create(user: writer, book:)
+
+# access all contributors (primary author, editor, illustrator, foreword writer)
+book.contributors.to_a
+# => [#<User id=1, name="Isaac Asimov">, #<User id=2, name="John W. Campbell">, #<User id=3, name="Frank Kelly Freas">, #<User id=4, name="Ray Bradbury">]
+
+# example of querying the union of contributors
+book.contributors.order(:name).limit(3)
+# => [#<User id=4, name="Frank Kelly Freas">, #<User id=3, name="Isaac Asimov">, #<User id=2, name="John W. Campbell">]
+
+book.contributors.where(id: editor.id)
+# => [#<User id=2, name="John W. Campbell">]
+
+book.contributors.to_sql
+# => SELECT * FROM users WHERE id IN (
+#      SELECT id FROM users WHERE id = ?
+#      UNION
+#      SELECT users.id FROM users INNER JOIN edits ON users.id = edits.user_id WHERE edits.book_id = ?
+#      UNION
+#      SELECT users.id FROM users INNER JOIN illustrations ON users.id = illustrations.user_id WHERE illustrations.book_id = ?
+#      UNION
+#      SELECT users.id FROM users INNER JOIN forewords ON users.id = forewords.user_id WHERE forewords.book_id = ?
+#   )
+
+# example of more advanced querying e.g. preloading the union
+Book.joins(:contributors).where(contributors: { ... })
+Book.preload(:contributors)
+Book.eager_load(:contributors)
+Book.includes(:contributors)
 ```
 
 Right now, the underlying table for each unioned association must match. We'd
 like to change that in the future. Originally, `union_of` was defined to make
 migrating from a has-one relationship to a many-to-many relationship easier
 and safer, while retaining backwards compatibility.
-
-Here's a quick example of what's possible:
-
-```ruby
-user          = User.create
-owned_license = License.create(owner: user)
-
-3.times do
-  shared_license = License.create
-  license_user   = LicenseUser.create(license: shared_license, user:)
-end
-
-user.licenses.to_a                # => [#<License id=1>, #<License id=2>, #<License id=3>, #<License id=4>]
-user.licenses.order(:id).limit(1) # => [#<License id=4>]
-user.licenses.where(id: 2)        # => [#<License id=2>]
-user.licenses.to_sql
-# => SELECT * FROM licenses WHERE id IN (
-#      SELECT id FROM licenses WHERE owner_id = ?
-#      UNION
-#      SELECT licenses.id FROM licenses INNER JOIN license_users ON licenses.id = license_users.license_id WHERE license_users.user_id = ?
-#    )
-
-User.joins(:licenses).where(licenses: { ... })
-User.preload(:licenses)
-User.eager_load(:licenses)
-User.includes(:licenses)
-```
 
 There is support for complex unions as well, e.g. a union made up of direct and
 through associations, even when those associations utilize union associations.
