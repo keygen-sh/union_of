@@ -1391,10 +1391,10 @@ RSpec.describe UnionOf do
       has_many :foreworders, through: :forewords, source: :user
 
       has_many :illustrations
-      has_many :illustrators, through: :illustrations, source: :user
+      has_many :illustrators, -> { distinct }, through: :illustrations, source: :user
 
       has_many :edits
-      has_many :editors, through: :edits, source: :user
+      has_many :editors, -> { distinct }, through: :edits, source: :user
 
       has_many :contributors, -> { distinct }, class_name: 'User', union_of: %i[
         author
@@ -1485,7 +1485,7 @@ RSpec.describe UnionOf do
                 )
                 UNION
                 (
-                  SELECT
+                  SELECT DISTINCT
                     users.id
                   FROM
                     users INNER JOIN illustrations ON users.id = illustrations.user_id
@@ -1494,7 +1494,7 @@ RSpec.describe UnionOf do
                 )
                 UNION
                 (
-                  SELECT
+                  SELECT DISTINCT
                     users.id
                   FROM
                     users INNER JOIN edits ON users.id = edits.user_id
