@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'rspec-rails'
   spec.add_development_dependency 'temporary_tables', '~> 1.0'
-  spec.add_development_dependency 'sql_matchers', '1.0.0.pre.rc.4'
+  spec.add_development_dependency 'sql_matchers', '~> 1.0'
   spec.add_development_dependency 'sqlite3', '~> 1.4'
   spec.add_development_dependency 'mysql2'
   spec.add_development_dependency 'pg'
