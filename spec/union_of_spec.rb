@@ -1396,7 +1396,7 @@ RSpec.describe UnionOf do
       has_many :edits
       has_many :editors, -> { distinct }, through: :edits, source: :user
 
-      has_many :contributors, -> { distinct }, class_name: 'User', union_of: %i[
+      has_many :contributors, class_name: 'User', union_of: %i[
         author
         coauthors
         foreworders
@@ -1437,7 +1437,7 @@ RSpec.describe UnionOf do
     it 'should use UNION' do
       expect(book.contributors.to_sql).to match_sql <<~SQL.squish
         SELECT
-          DISTINCT users.*
+          users.*
         FROM
           users
         WHERE

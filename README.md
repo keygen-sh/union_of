@@ -73,7 +73,7 @@ class Book < ActiveRecord::Base
   has_many :editors, -> { distinct }, through: :edits, source: :user
 
   # union association for all contributors to the book
-  has_many :contributors, -> { distinct }, class_name: 'User', union_of: %i[
+  has_many :contributors, class_name: 'User', union_of: %i[
     author
     coauthors
     foreworders
@@ -121,7 +121,7 @@ book.contributors.where(id: editor.id)
 # => [#<User id=2, name="John W. Campbell">]
 
 book.contributors.to_sql
-# => SELECT DISTINCT * FROM users WHERE id IN (
+# => SELECT * FROM users WHERE id IN (
 #      SELECT id FROM users WHERE id = 1
 #      UNION
 #      SELECT users.id FROM users INNER JOIN prefaces ON users.id = prefaces.user_id WHERE prefaces.book_id = 1
