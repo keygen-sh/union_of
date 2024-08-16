@@ -1507,19 +1507,19 @@ RSpec.describe UnionOf do
     end
 
     it 'should support joins' do
-      expect { Book.joins(:contributors).where(contributors: { user_id: author.id }) }.to_not raise_error
+      expect { Book.joins(:contributors).where(contributors: { id: author.id }).to_a }.to_not raise_error
     end
 
     it 'should support preloading' do
-      expect { Book.preload(:contributors) }.to_not raise_error
+      expect { Book.preload(:contributors).to_a }.to_not raise_error
     end
 
     it 'should support eager loading' do
-      expect { Book.eager_load(:contributors) }.to_not raise_error
+      expect { Book.eager_load(:contributors).to_a }.to_not raise_error
     end
 
     it 'should support includes' do
-      expect { Book.includes(:contributors) }.to_not raise_error
+      expect { Book.includes(:contributors).to_a }.to_not raise_error
     end
   end
 end
