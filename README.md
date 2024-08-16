@@ -171,6 +171,11 @@ We use Postgres in production, but we do not actively use MySQL or MariaDB, so
 there may be performance issues we are unaware of. If you stumble upon issues,
 please open an issue or a PR.
 
+## Acknowledgements
+
+`union_of` was inspired by [`active_record_union`](https://github.com/brianhempel/active_record_union/).
+For unions outside of associations, check it out.
+
 ## Is it any good?
 
 Yes.
