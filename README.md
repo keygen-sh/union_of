@@ -142,7 +142,7 @@ Book.includes(:contributors)
 
 Right now, the underlying table and model for each unioned association must
 match. We'd like to change that in the future. Originally, `union_of` was
-defined to make migrating from a has-one relationship to a many-to-many
+created to make migrating from a one-to-many relationship to a many-to-many
 relationship easier and safer, while retaining backwards compatibility.
 
 There is support for complex unions as well, e.g. a union made up of direct and
