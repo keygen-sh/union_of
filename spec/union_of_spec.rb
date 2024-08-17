@@ -118,8 +118,6 @@ RSpec.describe UnionOf do
   end
 
   temporary_model :user do
-    include UnionOf::Macro
-
     belongs_to :account, optional: true
     has_many :owned_licenses, class_name: 'License', foreign_key: :owner_id
     has_many :license_users
