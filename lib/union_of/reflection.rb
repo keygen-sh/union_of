@@ -17,7 +17,7 @@ module UnionOf
     def union_reflections = union_sources.collect { active_record.reflect_on_association(_1) }
 
     def join_scope(table, foreign_table, foreign_klass, alias_tracker = nil)
-      predicate_builder = klass.predicate_builder.with(ActiveRecord::TableMetadata.new(klass, table))
+      predicate_builder = ActiveRecord::PredicateBuilder.new(ActiveRecord::TableMetadata.new(klass, table))
       scope_chain_items = join_scopes(table, predicate_builder)
       klass_scope       = klass_join_scope(table, predicate_builder)
 
