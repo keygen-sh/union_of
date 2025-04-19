@@ -37,6 +37,12 @@ jobs:
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: test
+        # https://github.com/MariaDB/mariadb-docker/issues/497
+        options: >-
+          --health-cmd="mariadb-admin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
         ports:
           - 3307:3306 # avoid conflict w/ mysql
     steps:
