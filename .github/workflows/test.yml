@@ -14,8 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: ['3.4', '3.3', '3.2', '3.1']
         database: ['sqlite', 'postgres', 'mysql', 'mariadb']
+        gemfile: ['rails_7_0', 'rails_7_1', 'rails_7_2', 'rails_8_0', 'rails_edge']
+        ruby: ['3.4', '3.3', '3.2']
     services:
       postgres:
         image: postgres:15
@@ -45,6 +46,8 @@ jobs:
           --health-retries=5
         ports:
           - 3307:3306 # avoid conflict w/ mysql
+    env:
+      BUNDLE_GEMFILE: ${{github.workspace}}/gemfiles/${{matrix.gemfile}}.gemfile
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -72,5 +75,6 @@ jobs:
       - name: Test
         run: bundle exec rake test
         # sqlite is not supported yet because it doesn't support
-        # the union syntax we're using
-        continue-on-error: ${{matrix.database == 'sqlite'}}
+        # the union syntax we're using (and we don't consider
+        # failures for unreleased rails versions a blocker)
+        continue-on-error: ${{matrix.database == 'sqlite' || matrix.gemfile == 'rails_edge'}}
