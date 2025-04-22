@@ -178,7 +178,7 @@ For unions outside of associations, check it out.
 
 ## Is it any good?
 
-Yes.
+[Yes.](https://news.ycombinator.com/item?id=3067434)
 
 ## Contributing
 
